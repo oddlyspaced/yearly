@@ -45,7 +45,7 @@ export const CalendarCard = () => {
 			</Text>
 			<View
 				style={{
-					marginTop: 16,
+					marginTop: 24,
 					flexDirection: 'row',
 					justifyContent: 'space-between',
 					paddingBottom: 8,
@@ -94,6 +94,47 @@ export const CalendarCard = () => {
 									>
 										{date === 0 ? '' : date}
 									</Text>
+
+									{date &&
+									(date === selected || date === 18) ? (
+										<View
+											style={{
+												position: 'absolute',
+												bottom: 4,
+												paddingHorizontal: 4,
+												width: '100%',
+												flexDirection: 'row',
+												gap: 1,
+											}}
+										>
+											<View
+												style={{
+													flex: 1,
+													height: 3,
+													backgroundColor: '#3C65FF',
+													borderRadius: 4,
+												}}
+											/>
+											<View
+												style={{
+													// width: '100%',
+													flex: 1,
+													height: 3,
+													backgroundColor: '#CC53FF',
+													borderRadius: 4,
+												}}
+											/>
+											<View
+												style={{
+													// width: '100%',
+													flex: 1,
+													height: 3,
+													borderRadius: 4,
+													backgroundColor: '#FF5C40',
+												}}
+											/>
+										</View>
+									) : null}
 								</View>
 							);
 						})}
