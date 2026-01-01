@@ -1,20 +1,41 @@
 import dayjs from 'dayjs';
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 const DAYS: string[] = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 
-export const CalendarCard = () => {
-	const firstOfMonth = dayjs().startOf('month');
+interface ICalendarCardProps {
+	month: number;
+	year?: number;
+	containerStyle?: ViewStyle;
+}
+
+export const CalendarCard = ({
+	month,
+	year,
+	containerStyle,
+}: ICalendarCardProps) => {
+	const currentMonth = dayjs()
+		.year(year ?? 2026)
+		.month(month - 1);
+
+	const currentMonthTitle = currentMonth.format('MMMM');
+
+	const firstOfMonth = currentMonth.startOf('month');
 	const firstDay = firstOfMonth.day();
+	const daysInMonth = currentMonth.daysInMonth();
 
 	const rows = useMemo(() => {
 		let dateCounter = 1;
 		const days: number[][] = [];
-		for (let week = 0; week < 31 / 7; week++) {
+		for (let week = 0; week < daysInMonth / 7; week++) {
 			const row = [];
 			for (let i = 0 + week * 7; i <= 6 + week * 7; i++) {
-				row.push(i >= firstDay ? dateCounter++ : 0);
+				row.push(
+					i >= firstDay && dateCounter <= daysInMonth
+						? dateCounter++
+						: 0,
+				);
 			}
 			days.push(row);
 		}
@@ -25,14 +46,17 @@ export const CalendarCard = () => {
 
 	return (
 		<View
-			style={{
-				width: '100%',
-				backgroundColor: 'white',
-				borderRadius: 28,
-				paddingHorizontal: 20,
-				paddingTop: 18,
-				paddingBottom: 16,
-			}}
+			style={[
+				{
+					width: '100%',
+					backgroundColor: 'white',
+					borderRadius: 28,
+					paddingHorizontal: 20,
+					paddingTop: 18,
+					paddingBottom: 16,
+				},
+				containerStyle,
+			]}
 		>
 			<Text
 				style={{
@@ -41,7 +65,7 @@ export const CalendarCard = () => {
 					color: '#111111',
 				}}
 			>
-				January
+				{currentMonthTitle}
 			</Text>
 			<View
 				style={{
