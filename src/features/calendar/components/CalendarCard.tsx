@@ -78,13 +78,16 @@ export const CalendarCard = ({
 				}}
 			>
 				{DAYS.map((day) => (
-					<Text style={styles.dayHeading}>{day}</Text>
+					<Text key={day} style={styles.dayHeading}>
+						{day}
+					</Text>
 				))}
 			</View>
 			{/* date items */}
 			{rows.map((row, rowIndex) => {
 				return (
 					<View
+						key={rowIndex}
 						style={{
 							flexDirection: 'row',
 							justifyContent: 'space-between',
@@ -93,7 +96,9 @@ export const CalendarCard = ({
 						{row.map((date, dateIndex) => {
 							return (
 								<View
-									key={rowIndex + '_' + dateIndex}
+									key={
+										rowIndex + '_' + date + '_' + dateIndex
+									}
 									style={[
 										{
 											height: 54,
