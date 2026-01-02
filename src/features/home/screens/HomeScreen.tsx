@@ -1,11 +1,15 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Pressable, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+	SafeAreaView,
+	useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { TNavigationRouterProps } from '../../../core/navigation/NavigationRouterProps';
 import { CalendarCard } from '../../calendar/components/CalendarCard';
 import { WalkingIcon } from '../../../assets/icons/WalkingIcon';
 import { ChartIcon } from '../../../assets/icons/ChartIcon';
+import { AddIcon } from '../../../assets/icons/AddIcon';
 
 type TNavigationProps = StackNavigationProp<
 	TNavigationRouterProps,
@@ -19,6 +23,7 @@ interface IHomeScreenProps {
 }
 
 export const HomeScreen = ({ navigation, route }: IHomeScreenProps) => {
+	const { bottom } = useSafeAreaInsets();
 	return (
 		<SafeAreaView
 			style={{
@@ -189,6 +194,38 @@ export const HomeScreen = ({ navigation, route }: IHomeScreenProps) => {
 						</View>
 					</View>
 				</View>
+
+				{/* add icon */}
+				<Pressable
+					style={{
+						position: 'absolute',
+						bottom: 24,
+						right: 24,
+
+						flexDirection: 'row',
+						alignItems: 'center',
+						justifyContent: 'center',
+
+						backgroundColor: '#3B82F6', // calm iOS-style blue
+						borderRadius: 100,
+
+						paddingHorizontal: 18,
+						paddingVertical: 12,
+					}}
+				>
+					<AddIcon width={20} height={20} color={'white'} />
+					<Text
+						style={{
+							fontSize: 18,
+							fontWeight: '600',
+							color: '#FFFFFF',
+							lineHeight: 20,
+							marginStart: 4,
+						}}
+					>
+						Add
+					</Text>
+				</Pressable>
 			</View>
 		</SafeAreaView>
 	);
