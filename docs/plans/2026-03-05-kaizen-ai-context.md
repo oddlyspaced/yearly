@@ -21,6 +21,7 @@
 Implement **only** what is listed in this document and the PRD. Do not add features, screens, or flows not listed here without explicit user confirmation.
 
 **Explicitly out of scope — do not implement:**
+
 - Social features (sharing, friends, leaderboards)
 - Gamification (points, badges, levels)
 - AI features of any kind
@@ -49,12 +50,12 @@ RootStack (Stack Navigator)
 
 ## Screen List (MVP only)
 
-| Screen              | Component name          | Route name          | Notes                                      |
-| ------------------- | ----------------------- | ------------------- | ------------------------------------------ |
-| Home / Dashboard    | `HomeScreen`            | `Home`              | Default screen                             |
-| Habit Detail        | `HabitDetailScreen`     | `HabitDetail`       | Receives `habitId`                         |
-| Create Habit        | `CreateHabitScreen`     | `CreateHabit`       | Opened via `+` on HomeScreen               |
-| Edit Habit          | `EditHabitScreen`       | `EditHabit`         | Receives `habitId`; same form as Create    |
+| Screen           | Component name      | Route name    | Notes                                   |
+| ---------------- | ------------------- | ------------- | --------------------------------------- |
+| Home / Dashboard | `HomeScreen`        | `Home`        | Default screen                          |
+| Habit Detail     | `HabitDetailScreen` | `HabitDetail` | Receives `habitId`                      |
+| Create Habit     | `CreateHabitScreen` | `CreateHabit` | Opened via `+` on HomeScreen            |
+| Edit Habit       | `EditHabitScreen`   | `EditHabit`   | Receives `habitId`; same form as Create |
 
 ---
 
@@ -64,29 +65,29 @@ Build these as shared, reusable components before implementing screens.
 
 ### Base / UI components
 
-| Component           | Props (key)                                                                             | Notes                                          |
-| ------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `Button`            | `variant` (`primary` \| `secondary` \| `destructive`), `onPress`, `loading?`, `label` | Covers all CTA styles                          |
-| `Input`             | `label?`, `value`, `onChangeText`, `error?`, `multiline?`, `keyboardType?`             |                                                |
-| `EmptyState`        | `title`, `message`, `ctaLabel?`, `onCta?`                                              | Used on HomeScreen when no habits exist        |
-| `ConfirmDialog`     | `visible`, `title`, `message`, `confirmLabel`, `onConfirm`, `onCancel`                 | Used for delete confirmation                   |
-| `SectionHeader`     | `label`                                                                                 | "Incomplete" / "Completed" section labels      |
-| `IconPicker`        | `selected`, `onSelect`                                                                  | Scrollable row/grid of preset icons            |
-| `ColourPicker`      | `selected`, `onSelect`                                                                  | Row of preset colour swatches                  |
-| `SegmentedControl`  | `options: string[]`, `selected`, `onSelect`                                            | Used for tracking type and period selectors    |
-| `CalendarGrid`      | `month: string` (YYYY-MM), `logs: HabitLog[]`, `createdAt`, `targetValue?`, `trackingType` | Single month calendar grid — reused in both inline and bottom sheet contexts |
+| Component              | Props (key)                                                                                      | Notes                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `Button`               | `variant` (`primary` \| `secondary` \| `destructive`), `onPress`, `loading?`, `label`            | Covers all CTA styles                                                                       |
+| `Input`                | `label?`, `value`, `onChangeText`, `error?`, `multiline?`, `keyboardType?`                       |                                                                                             |
+| `EmptyState`           | `title`, `message`, `ctaLabel?`, `onCta?`                                                        | Used on HomeScreen when no habits exist                                                     |
+| `ConfirmDialog`        | `visible`, `title`, `message`, `confirmLabel`, `onConfirm`, `onCancel`                           | Used for delete confirmation                                                                |
+| `SectionHeader`        | `label`                                                                                          | "Incomplete" / "Completed" section labels                                                   |
+| `IconPicker`           | `selected`, `onSelect`                                                                           | Scrollable row/grid of preset icons                                                         |
+| `ColourPicker`         | `selected`, `onSelect`                                                                           | Row of preset colour swatches                                                               |
+| `SegmentedControl`     | `options: string[]`, `selected`, `onSelect`                                                      | Used for tracking type and period selectors                                                 |
+| `CalendarGrid`         | `month: string` (YYYY-MM), `logs: HabitLog[]`, `createdAt`, `targetValue?`, `trackingType`       | Single month calendar grid — reused in both inline and bottom sheet contexts                |
 | `CalendarHistorySheet` | `visible`, `onClose`, `habitId`, `createdAt`, `logs: HabitLog[]`, `targetValue?`, `trackingType` | Bottom sheet with two snap points (mid, full); scrollable list of `CalendarGrid` components |
-| `StatBlock`         | `label`, `value`                                                                        | E.g. "12 day streak", "best: 30 days"         |
-| `PastValuesLog`     | `logs: HabitLog[]`, `unit?`                                                            | Chronological list of log entries              |
+| `StatBlock`            | `label`, `value`                                                                                 | E.g. "12 day streak", "best: 30 days"                                                       |
+| `PastValuesLog`        | `logs: HabitLog[]`, `unit?`                                                                      | Chronological list of log entries                                                           |
 
 ### App-specific components
 
-| Component           | Used on              | Notes                                                                                                |
-| ------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `HabitCard`         | HomeScreen           | Shows habit name, icon, colour, tracking type indicator, progress, quick log controls (see below)    |
-| `NumericLogger`     | HabitDetailScreen    | Large central text input + `−` button left + `+` button right; tapping number opens keyboard        |
-| `CheckboxLogger`    | HabitDetailScreen    | Large tappable checkbox with "Done for today" label                                                  |
-| `TargetPicker`      | CreateHabitScreen, EditHabitScreen | Collapsible section: numeric input + Daily/Weekly/Monthly period selector     |
+| Component        | Used on                            | Notes                                                                                             |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `HabitCard`      | HomeScreen                         | Shows habit name, icon, colour, tracking type indicator, progress, quick log controls (see below) |
+| `NumericLogger`  | HabitDetailScreen                  | Large central text input + `−` button left + `+` button right; tapping number opens keyboard      |
+| `CheckboxLogger` | HabitDetailScreen                  | Large tappable checkbox with "Done for today" label                                               |
+| `TargetPicker`   | CreateHabitScreen, EditHabitScreen | Collapsible section: numeric input + Daily/Weekly/Monthly period selector                         |
 
 ---
 
@@ -95,12 +96,14 @@ Build these as shared, reusable components before implementing screens.
 The `HabitCard` is the core interactive unit on HomeScreen.
 
 **Layout:**
+
 - Left: habit icon (coloured, using the habit's chosen colour)
 - Centre: habit name, progress label (e.g. "9 / 10 glasses" or unchecked/checked state)
 - Right (numeric): `−` and `+` buttons for quick inline logging
 - Right (checkbox): tappable checkbox
 
 **Interactions:**
+
 - Tap card body → navigate to `HabitDetailScreen`
 - Tap `+` → increment today's value by 1; if target reached, move card to Completed section
 - Tap `−` → decrement today's value by 1 (floor at 0)
@@ -114,6 +117,7 @@ The `HabitCard` is the core interactive unit on HomeScreen.
 Used on `HabitDetailScreen` for numeric habits.
 
 **Layout:**
+
 ```
 [ − ]   [ large text input showing today's value ]   [ + ]
               "of {targetValue} {unit} / {period}"
@@ -133,34 +137,37 @@ Used on `HabitDetailScreen` for numeric habits.
 Used both inline on `HabitDetailScreen` and inside `CalendarHistorySheet`.
 
 **Props:**
+
 ```ts
 type CalendarGridProps = {
-  month: string;           // YYYY-MM
-  logs: HabitLog[];
-  createdAt: string;       // ISO date — days before this are not rendered
-  targetValue?: number;
-  trackingType: 'numeric' | 'checkbox';
-  displayMode: 'value' | 'date';  // controlled by parent toggle
-}
+	month: string; // YYYY-MM
+	logs: HabitLog[];
+	createdAt: string; // ISO date — days before this are not rendered
+	targetValue?: number;
+	trackingType: 'numeric' | 'checkbox';
+	displayMode: 'value' | 'date'; // controlled by parent toggle
+};
 ```
 
 **Day states — definitive spec:**
 
-| State                              | Visual                                                               |
-| ---------------------------------- | -------------------------------------------------------------------- |
-| Future date                        | Greyed-out circle; not interactive                                   |
-| Empty (no value logged, or 0)      | No border, no fill — completely blank                                |
-| Partially met (numeric with target)| Partial arc border only (no fill). Arc length = `loggedValue / targetValue`. E.g. 4/8 = 180° arc (50%) |
-| Fully met (target reached / checkbox ticked) | Fully filled circle in the habit's accent colour          |
-| Today                              | Solid filled black circle (light mode) / white circle (dark mode), regardless of progress state |
-| Before creation date               | Not rendered                                                         |
+| State                                        | Visual                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Future date                                  | Greyed-out circle; not interactive                                                                     |
+| Empty (no value logged, or 0)                | No border, no fill — completely blank                                                                  |
+| Partially met (numeric with target)          | Partial arc border only (no fill). Arc length = `loggedValue / targetValue`. E.g. 4/8 = 180° arc (50%) |
+| Fully met (target reached / checkbox ticked) | Fully filled circle in the habit's accent colour                                                       |
+| Today                                        | Solid filled black circle (light mode) / white circle (dark mode), regardless of progress state        |
+| Before creation date                         | Not rendered                                                                                           |
 
 **Label inside circle (display mode toggle):**
+
 - **`value` mode (default):** Show the logged value for that day, formatted compactly (e.g. `10.5K` for 10500, `8K` for 8000, `30` for 30). Blank for empty days.
 - **`date` mode:** Show the calendar date number (1–31).
 - Checkbox habits: no label shown in either mode — circle state only.
 
 **Implementation note:**
+
 - Use SVG (via `react-native-svg`) to draw the partial arc. The arc is a `stroke`-only path; no fill until fully met.
 - Arc starts at the top (−90°) and sweeps clockwise.
 - Tapping any day does nothing (view only in MVP)
@@ -179,11 +186,11 @@ A bottom sheet opened from `HabitDetailScreen` via the expand button on the inli
 
 ## Data Entities
 
-| Entity       | Fields                                                                                                                                          | Storage     |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `Habit`      | `id: string` (uuid), `name: string`, `icon: string`, `colour: string`, `trackingType: 'numeric' \| 'checkbox'`, `unit: string \| null`, `targetValue: number \| null`, `targetPeriod: 'daily' \| 'weekly' \| 'monthly' \| null`, `notes: string \| null`, `createdAt: string` (ISO date) | SQLite      |
-| `HabitLog`   | `id: string` (uuid), `habitId: string`, `date: string` (YYYY-MM-DD), `value: number`, `isManuallyCompleted: boolean`, `loggedAt: string` (ISO timestamp) | SQLite      |
-| `AppSettings`| `calendarDisplayMode: 'value' \| 'date'`                                                                                                        | MMKV — UI preferences only |
+| Entity        | Fields                                                                                                                                                                                                                                                                                   | Storage                    |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `Habit`       | `id: string` (uuid), `name: string`, `icon: string`, `colour: string`, `trackingType: 'numeric' \| 'checkbox'`, `unit: string \| null`, `targetValue: number \| null`, `targetPeriod: 'daily' \| 'weekly' \| 'monthly' \| null`, `notes: string \| null`, `createdAt: string` (ISO date) | SQLite                     |
+| `HabitLog`    | `id: string` (uuid), `habitId: string`, `date: string` (YYYY-MM-DD), `value: number`, `isManuallyCompleted: boolean`, `loggedAt: string` (ISO timestamp)                                                                                                                                 | SQLite                     |
+| `AppSettings` | `calendarDisplayMode: 'value' \| 'date'`                                                                                                                                                                                                                                                 | MMKV — UI preferences only |
 
 ---
 
@@ -191,7 +198,11 @@ A bottom sheet opened from `HabitDetailScreen` via the expand button on the inli
 
 ```ts
 // Is a habit completed for a given reference date?
-function isHabitCompletedOn(habit: Habit, logs: HabitLog[], date: string): boolean
+function isHabitCompletedOn(
+	habit: Habit,
+	logs: HabitLog[],
+	date: string,
+): boolean;
 
 // For checkbox habits:
 //   → true if a log exists for date with value === 1
@@ -215,7 +226,10 @@ function isHabitCompletedOn(habit: Habit, logs: HabitLog[], date: string): boole
 
 ```ts
 // Returns { currentStreak: number, bestStreak: number }
-function calculateStreaks(habit: Habit, logs: HabitLog[]): { currentStreak: number; bestStreak: number }
+function calculateStreaks(
+	habit: Habit,
+	logs: HabitLog[],
+): { currentStreak: number; bestStreak: number };
 
 // For daily habits: count consecutive completed days going backwards from today
 // For weekly habits: count consecutive completed weeks going backwards from current week
@@ -267,17 +281,18 @@ CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON habit_logs(date);
 
 **Approach:** Zustand for global UI/app state + direct SQLite queries for data access (no ORM).
 
-| Store          | Holds                                                              | Notes                                           |
-| -------------- | ------------------------------------------------------------------ | ----------------------------------------------- |
-| `useHabitStore`| `habits: Habit[]`, CRUD actions (`addHabit`, `updateHabit`, `deleteHabit`, `loadHabits`) | Synced with SQLite on load and after mutations  |
-| `useLogStore`  | `logs: HabitLog[]` for today, log actions (`logValue`, `toggleCheckbox`, `markManuallyComplete`) | Loaded fresh on HomeScreen mount               |
-| `useSettingsStore` | `calendarDisplayMode: 'value' \| 'date'`, `setCalendarDisplayMode` | Persisted to MMKV                         |
+| Store              | Holds                                                                                            | Notes                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| `useHabitStore`    | `habits: Habit[]`, CRUD actions (`addHabit`, `updateHabit`, `deleteHabit`, `loadHabits`)         | Synced with SQLite on load and after mutations |
+| `useLogStore`      | `logs: HabitLog[]` for today, log actions (`logValue`, `toggleCheckbox`, `markManuallyComplete`) | Loaded fresh on HomeScreen mount               |
+| `useSettingsStore` | `calendarDisplayMode: 'value' \| 'date'`, `setCalendarDisplayMode`                               | Persisted to MMKV                              |
 
 ---
 
 ## HomeScreen Data Loading
 
 On mount, HomeScreen should:
+
 1. Load all habits from `useHabitStore` (sorted by `sortOrder`)
 2. Load today's logs for all habits
 3. Derive completed vs incomplete list using the completion logic utilities
@@ -289,17 +304,17 @@ The home screen should re-derive sections reactively when a log action is perfor
 
 ## Third-party Integrations (MVP)
 
-| Integration       | Package                                                        | Purpose                        | Notes                                     |
-| ----------------- | -------------------------------------------------------------- | ------------------------------ | ----------------------------------------- |
-| Local database    | `expo-sqlite`                                                  | Persist habits + logs          | Use WAL mode for performance              |
-| Settings storage  | `react-native-mmkv`                                            | Persist UI preferences         | Requires dev client / local build         |
-| Unique IDs        | `expo-crypto`                                                  | Generate habit and log IDs     |                                           |
-| State management  | `zustand`                                                      | App-wide state                 |                                           |
-| Navigation        | `@react-navigation/native` + `@react-navigation/native-stack`  | Stack navigation               |                                           |
-| Icons             | `@expo/vector-icons`                                           | Habit icons                    | Bundled with Expo; no extra install needed|
-| SVG / arc drawing | `react-native-svg`                                             | Calendar partial arc circles   | Required for progress arc rendering       |
-| Bottom sheet      | `@gorhom/bottom-sheet`                                         | Calendar history sheet         | Snap points: mid + full                   |
-| Colours           | 12 preset swatches                                             | Habit card theming             | Define as a constant array in the codebase|
+| Integration       | Package                                                       | Purpose                      | Notes                                      |
+| ----------------- | ------------------------------------------------------------- | ---------------------------- | ------------------------------------------ |
+| Local database    | `expo-sqlite`                                                 | Persist habits + logs        | Use WAL mode for performance               |
+| Settings storage  | `react-native-mmkv`                                           | Persist UI preferences       | Requires dev client / local build          |
+| Unique IDs        | `expo-crypto`                                                 | Generate habit and log IDs   |                                            |
+| State management  | `zustand`                                                     | App-wide state               |                                            |
+| Navigation        | `@react-navigation/native` + `@react-navigation/native-stack` | Stack navigation             |                                            |
+| Icons             | `@expo/vector-icons`                                          | Habit icons                  | Bundled with Expo; no extra install needed |
+| SVG / arc drawing | `react-native-svg`                                            | Calendar partial arc circles | Required for progress arc rendering        |
+| Bottom sheet      | `@gorhom/bottom-sheet`                                        | Calendar history sheet       | Snap points: mid + full                    |
+| Colours           | 12 preset swatches                                            | Habit card theming           | Define as a constant array in the codebase |
 
 ---
 
