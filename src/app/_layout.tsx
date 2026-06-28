@@ -1,36 +1,56 @@
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 
-export default function Layout() {
+import { useStore } from '@/store/useStore';
+import { useAppFonts } from '@/theme/fonts';
+import { colors } from '@/theme';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+export default function RootLayout() {
+	const fontsLoaded = useAppFonts();
+	const init = useStore((s) => s.init);
+	const ready = useStore((s) => s.ready);
+
+	useEffect(() => {
+		init();
+	}, [init]);
+
+	useEffect(() => {
+		if (fontsLoaded && ready) SplashScreen.hideAsync().catch(() => {});
+	}, [fontsLoaded, ready]);
+
+	if (!fontsLoaded || !ready) {
+		return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+	}
+
 	return (
-		<Stack
-			screenOptions={{
-				headerShown: false,
-			}}
-		>
-			<Stack.Screen
-				name='index'
-				options={{
-					title: 'Home',
-				}}
-			/>
-			<Stack.Screen
-				name='create'
-				options={{
-					title: 'Create',
-				}}
-			/>
-			<Stack.Screen
-				name='details'
-				options={{
-					title: 'Details',
-				}}
-			/>
-			<Stack.Screen
-				name='edit'
-				options={{
-					title: 'Edit',
-				}}
-			/>
-		</Stack>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<SafeAreaProvider>
+				<StatusBar style='dark' />
+				<Stack
+					screenOptions={{
+						headerShown: false,
+						contentStyle: { backgroundColor: colors.bg },
+					}}
+				>
+					<Stack.Screen name='(tabs)' />
+					<Stack.Screen
+						name='create'
+						options={{ presentation: 'modal' }}
+					/>
+					<Stack.Screen
+						name='edit'
+						options={{ presentation: 'modal' }}
+					/>
+					<Stack.Screen name='details' />
+				</Stack>
+			</SafeAreaProvider>
+		</GestureHandlerRootView>
 	);
 }
