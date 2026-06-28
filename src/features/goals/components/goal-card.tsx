@@ -1,0 +1,194 @@
+import { memo } from 'react';
+import { Pressable, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+
+import { IconBadge, IconButton, ProgressRing, Text } from '@/core/ui';
+import { haptics } from '@/core/lib/haptics';
+import {
+	dayCompletion,
+	evaluatePeriod,
+	isDayComplete,
+} from '@/core/domain/aggregation';
+import { formatValue, quickStep } from '@/core/domain/format';
+import { periodRange } from '@/core/domain/period';
+import { Entry, Goal, PERIOD_SUFFIX } from '@/core/domain/types';
+import { colors, radii, shadow, spacing } from '@/core/theme';
+
+interface GoalCardProps {
+	goal: Goal;
+	entries: Entry[];
+	todayEntry?: Entry;
+	onPress: () => void;
+	onToggle: () => void;
+	onStep: (delta: number) => void;
+}
+
+function progressLabel(
+	goal: Goal,
+	entries: Entry[],
+	todayEntry?: Entry,
+): string {
+	const todayVal = todayEntry?.state === 'logged' ? todayEntry.value : 0;
+	if (goal.type === 'checkbox') {
+		if (goal.period === 'daily')
+			return isDayComplete(goal, todayEntry)
+				? 'Done for today'
+				: 'Not yet';
+		const res = evaluatePeriod(
+			goal,
+			entries,
+			periodRange(goal.period, new Date()),
+			new Date(),
+		);
+		return `${res.actual} / ${res.target} this ${PERIOD_SUFFIX[goal.period]}`;
+	}
+	const unit = goal.unit ?? '';
+	if (goal.period === 'daily') {
+		const t = goal.targetValue ? ` / ${formatValue(goal.targetValue)}` : '';
+		return `${formatValue(todayVal)}${t} ${unit}`.trim();
+	}
+	const res = evaluatePeriod(
+		goal,
+		entries,
+		periodRange(goal.period, new Date()),
+		new Date(),
+	);
+	const actual = formatValue(res.actual);
+	const t = goal.targetValue ? ` / ${formatValue(goal.targetValue)}` : '';
+	return `${actual}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
+}
+
+export const GoalCard = memo(function GoalCard({
+	goal,
+	entries,
+	todayEntry,
+	onPress,
+	onToggle,
+	onStep,
+}: GoalCardProps) {
+	const ringProgress =
+		goal.period === 'daily'
+			? dayCompletion(goal, todayEntry)
+			: evaluatePeriod(
+					goal,
+					entries,
+					periodRange(goal.period, new Date()),
+					new Date(),
+				).pct;
+	const complete =
+		goal.period === 'daily'
+			? isDayComplete(goal, todayEntry)
+			: ringProgress >= 1;
+	const stepStyle = {
+		width: 36,
+		height: 36,
+		borderRadius: radii.pill,
+		backgroundColor: colors.surfaceStrong,
+	} as const;
+
+	return (
+		<Pressable
+			onPress={onPress}
+			style={({ pressed }) => [
+				{
+					flexDirection: 'row',
+					alignItems: 'center',
+					gap: spacing.md,
+					padding: spacing.base,
+					backgroundColor: colors.surface,
+					borderRadius: radii.lg,
+					opacity: pressed ? 0.96 : 1,
+				},
+				shadow.card,
+			]}
+		>
+			<IconBadge
+				name={goal.icon}
+				size={42}
+				color={goal.color}
+				background={`${goal.color}1A`}
+			/>
+
+			<View style={{ flex: 1 }}>
+				<Text variant='label' weight='semibold' numberOfLines={1}>
+					{goal.name}
+				</Text>
+				<Text
+					variant='small'
+					muted
+					style={{ marginTop: 1 }}
+					numberOfLines={1}
+				>
+					{progressLabel(goal, entries, todayEntry)}
+				</Text>
+			</View>
+
+			{goal.type === 'checkbox' ? (
+				<Pressable
+					onPress={() => {
+						if (complete) haptics.light();
+						else haptics.success();
+						onToggle();
+					}}
+					hitSlop={10}
+				>
+					<ProgressRing
+						progress={ringProgress}
+						size={32}
+						stroke={2.5}
+						fillWhenComplete
+					>
+						{complete ? (
+							<Feather
+								name='check'
+								size={18}
+								color={colors.onAccent}
+							/>
+						) : null}
+					</ProgressRing>
+				</Pressable>
+			) : (
+				<View
+					style={{
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: spacing.sm,
+					}}
+				>
+					<IconButton
+						name='minus'
+						size={16}
+						onPress={() => {
+							haptics.light();
+							onStep(-quickStep(goal));
+						}}
+						style={stepStyle}
+					/>
+					<ProgressRing
+						progress={ringProgress}
+						size={34}
+						stroke={2.5}
+						fillWhenComplete
+					>
+						{complete ? (
+							<Feather
+								name='check'
+								size={16}
+								color={colors.onAccent}
+							/>
+						) : null}
+					</ProgressRing>
+					<IconButton
+						name='plus'
+						size={16}
+						onPress={() => {
+							haptics.light();
+							onStep(quickStep(goal));
+						}}
+						style={stepStyle}
+					/>
+				</View>
+			)}
+		</Pressable>
+	);
+});

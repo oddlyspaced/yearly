@@ -11,7 +11,9 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo-google-fonts/geist": "^0.4.2",
     "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/space-mono": "^0.4.2",
     "@react-navigation/bottom-tabs": "^7.7.3",
     "@react-navigation/elements": "^2.8.1",
     "@react-navigation/native": "^7.1.28",
@@ -23,6 +25,7 @@
     "expo-device": "~55.0.9",
     "expo-font": "~55.0.4",
     "expo-glass-effect": "~55.0.7",
+    "expo-haptics": "~55.0.15",
     "expo-image": "~55.0.5",
     "expo-linking": "~55.0.7",
     "expo-router": "~55.0.3",

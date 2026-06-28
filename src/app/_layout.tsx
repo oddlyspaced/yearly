@@ -6,9 +6,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
-import { useStore } from '@/store/useStore';
-import { useAppFonts } from '@/theme/fonts';
-import { colors } from '@/theme';
+import { useStore } from '@/core/store/useStore';
+import { useAppFonts } from '@/core/theme/fonts';
+import { colors } from '@/core/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
