@@ -15,6 +15,12 @@ export type Comparator = 'at_least' | 'at_most';
 
 export type EntryState = 'logged' | 'skip';
 
+/** A daily reminder time for a goal (local time, 24h). */
+export interface Reminder {
+	hour: number;
+	minute: number;
+}
+
 export interface Goal {
 	id: string;
 	name: string;
@@ -31,6 +37,8 @@ export interface Goal {
 	icon: string;
 	/** Accent color (kept near-monochrome by the picker palette). */
 	color: string;
+	/** Daily reminder times. */
+	reminders: Reminder[];
 	sortOrder: number;
 	archived: boolean;
 	/** ISO timestamp. */

@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 
-import { Entry, Goal } from '@/core/domain/types';
+import { Entry, Goal, Reminder } from '@/core/domain/types';
 
 const db = SQLite.openDatabaseSync('kaizen.db');
 
@@ -21,6 +21,7 @@ export function initDb(): void {
 			target_value REAL,
 			icon TEXT NOT NULL,
 			color TEXT NOT NULL,
+			reminders TEXT NOT NULL DEFAULT '[]',
 			sort_order INTEGER NOT NULL DEFAULT 0,
 			archived INTEGER NOT NULL DEFAULT 0,
 			created_at TEXT NOT NULL
@@ -44,6 +45,25 @@ export function initDb(): void {
 		CREATE INDEX IF NOT EXISTS idx_entries_goal ON entries(goal_id);
 		CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
 	`);
+
+	// Migrate older installs that predate the reminders column.
+	try {
+		db.execSync(
+			"ALTER TABLE goals ADD COLUMN reminders TEXT NOT NULL DEFAULT '[]'",
+		);
+	} catch {
+		// Column already exists — ignore.
+	}
+}
+
+function parseReminders(raw: string | null): Reminder[] {
+	if (!raw) return [];
+	try {
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? (parsed as Reminder[]) : [];
+	} catch {
+		return [];
+	}
 }
 
 /** Simple key-value meta (e.g. the user's name). */
@@ -75,6 +95,7 @@ interface GoalRow {
 	target_value: number | null;
 	icon: string;
 	color: string;
+	reminders: string | null;
 	sort_order: number;
 	archived: number;
 	created_at: string;
@@ -100,6 +121,7 @@ const toGoal = (r: GoalRow): Goal => ({
 	targetValue: r.target_value,
 	icon: r.icon,
 	color: r.color,
+	reminders: parseReminders(r.reminders),
 	sortOrder: r.sort_order,
 	archived: r.archived === 1,
 	createdAt: r.created_at,
@@ -130,8 +152,8 @@ export function selectEntries(): Entry[] {
 
 export function insertGoal(g: Goal): void {
 	db.runSync(
-		`INSERT INTO goals (id, name, type, unit, period, aggregation, comparator, target_value, icon, color, sort_order, archived, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO goals (id, name, type, unit, period, aggregation, comparator, target_value, icon, color, reminders, sort_order, archived, created_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		[
 			g.id,
 			g.name,
@@ -143,6 +165,7 @@ export function insertGoal(g: Goal): void {
 			g.targetValue,
 			g.icon,
 			g.color,
+			JSON.stringify(g.reminders ?? []),
 			g.sortOrder,
 			g.archived ? 1 : 0,
 			g.createdAt,
@@ -152,7 +175,7 @@ export function insertGoal(g: Goal): void {
 
 export function updateGoalRow(g: Goal): void {
 	db.runSync(
-		`UPDATE goals SET name=?, type=?, unit=?, period=?, aggregation=?, comparator=?, target_value=?, icon=?, color=?, sort_order=?, archived=? WHERE id=?`,
+		`UPDATE goals SET name=?, type=?, unit=?, period=?, aggregation=?, comparator=?, target_value=?, icon=?, color=?, reminders=?, sort_order=?, archived=? WHERE id=?`,
 		[
 			g.name,
 			g.type,
@@ -163,6 +186,7 @@ export function updateGoalRow(g: Goal): void {
 			g.targetValue,
 			g.icon,
 			g.color,
+			JSON.stringify(g.reminders ?? []),
 			g.sortOrder,
 			g.archived ? 1 : 0,
 			g.id,

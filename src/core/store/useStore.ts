@@ -17,6 +17,13 @@ import {
 import { todayKey } from '@/core/domain/period';
 import { Entry, Goal, NewGoal } from '@/core/domain/types';
 import { seedDevData } from '@/core/db/seed';
+import {
+	configureNotifications,
+	getNotificationPermission,
+	NotificationPermission,
+	requestNotificationPermission,
+	rescheduleAllReminders,
+} from '@/core/lib/notifications';
 
 /** DEV: seed sample data on first launch. Set to false before release builds. */
 const SEED_DEV = false;
@@ -26,10 +33,13 @@ interface AppState {
 	goals: Goal[];
 	entries: Entry[];
 	userName: string;
+	notifPermission: NotificationPermission;
 
 	init: () => void;
 	reload: () => void;
 	setUserName: (name: string) => void;
+	refreshNotifPermission: () => void;
+	requestNotifPermission: () => void;
 
 	addGoal: (input: NewGoal) => Goal;
 	editGoal: (id: string, input: NewGoal, clearEntries?: boolean) => void;
@@ -48,16 +58,28 @@ export const useStore = create<AppState>((set, get) => ({
 	goals: [],
 	entries: [],
 	userName: 'Hardik',
+	notifPermission: 'undetermined',
 
 	init: () => {
 		initDb();
 		if (SEED_DEV) seedDevData();
+		const goals = selectGoals();
 		set({
-			goals: selectGoals(),
+			goals,
 			entries: selectEntries(),
 			userName: getMeta('userName') ?? 'Hardik',
 			ready: true,
 		});
+		// Notifications: configure, request once on launch, sync schedule.
+		(async () => {
+			await configureNotifications();
+			let status = await getNotificationPermission();
+			if (status === 'undetermined') {
+				status = await requestNotificationPermission();
+			}
+			set({ notifPermission: status });
+			await rescheduleAllReminders(get().goals);
+		})();
 	},
 
 	reload: () => set({ goals: selectGoals(), entries: selectEntries() }),
@@ -66,6 +88,22 @@ export const useStore = create<AppState>((set, get) => ({
 		const clean = name.trim() || 'Hardik';
 		setMeta('userName', clean);
 		set({ userName: clean });
+	},
+
+	refreshNotifPermission: () => {
+		(async () => {
+			const status = await getNotificationPermission();
+			set({ notifPermission: status });
+			if (status === 'granted') await rescheduleAllReminders(get().goals);
+		})();
+	},
+
+	requestNotifPermission: () => {
+		(async () => {
+			const status = await requestNotificationPermission();
+			set({ notifPermission: status });
+			if (status === 'granted') await rescheduleAllReminders(get().goals);
+		})();
 	},
 
 	addGoal: (input) => {
@@ -78,6 +116,7 @@ export const useStore = create<AppState>((set, get) => ({
 		};
 		insertGoal(goal);
 		set({ goals: selectGoals() });
+		void rescheduleAllReminders(get().goals);
 		return goal;
 	},
 
@@ -87,11 +126,13 @@ export const useStore = create<AppState>((set, get) => ({
 		updateGoalRow({ ...existing, ...input });
 		if (clearEntries) deleteEntriesForGoal(id);
 		set({ goals: selectGoals(), entries: selectEntries() });
+		void rescheduleAllReminders(get().goals);
 	},
 
 	removeGoal: (id) => {
 		deleteGoalRow(id);
 		set({ goals: selectGoals(), entries: selectEntries() });
+		void rescheduleAllReminders(get().goals);
 	},
 
 	setValue: (goalId, date, value) => {

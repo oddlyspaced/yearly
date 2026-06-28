@@ -24,6 +24,7 @@ import {
 	PERIOD_LABELS,
 	PERIOD_SUFFIX,
 	Period,
+	Reminder,
 } from '@/core/domain/types';
 import { colors, spacing } from '@/core/theme';
 import {
@@ -40,6 +41,7 @@ import {
 	IconPicker,
 } from '@/features/goals/components/pickers';
 import { Input } from '@/features/goals/components/ui-input';
+import { RemindersField } from '@/features/goals/components/reminders-field';
 
 interface GoalFormProps {
 	initial?: Partial<NewGoal>;
@@ -83,6 +85,9 @@ export function GoalForm({
 	);
 	const [icon, setIcon] = useState(initial?.icon ?? GOAL_ICONS[0]);
 	const [color, setColor] = useState(initial?.color ?? GOAL_COLORS[0]);
+	const [reminders, setReminders] = useState<Reminder[]>(
+		initial?.reminders ?? [],
+	);
 	const [advanced, setAdvanced] = useState(false);
 
 	const toggleAdvanced = () => setAdvanced((a) => !a);
@@ -155,6 +160,7 @@ export function GoalForm({
 						: (targetNum ?? 1),
 			icon,
 			color,
+			reminders,
 		};
 		onSubmit(goal, initialType != null && initialType !== type);
 	};
@@ -263,6 +269,12 @@ export function GoalForm({
 					value={color}
 					onChange={setColor}
 				/>
+			</Animated.View>
+
+			{/* Reminders */}
+			<Animated.View layout={reflow}>
+				<SectionLabel>Reminders</SectionLabel>
+				<RemindersField value={reminders} onChange={setReminders} />
 			</Animated.View>
 
 			<Animated.View layout={reflow}>

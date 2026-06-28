@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useStore } from '@/core/store/useStore';
 import { useAppFonts } from '@/core/theme/fonts';
 import { colors } from '@/core/theme';
+import { NotificationBanner } from '@/core/ui/notification-banner';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -33,23 +34,28 @@ export default function RootLayout() {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<SafeAreaProvider>
 				<StatusBar style='dark' />
-				<Stack
-					screenOptions={{
-						headerShown: false,
-						contentStyle: { backgroundColor: colors.bg },
-					}}
-				>
-					<Stack.Screen name='(tabs)' />
-					<Stack.Screen
-						name='create'
-						options={{ presentation: 'modal' }}
-					/>
-					<Stack.Screen
-						name='edit'
-						options={{ presentation: 'modal' }}
-					/>
-					<Stack.Screen name='details' />
-				</Stack>
+				<View style={{ flex: 1, backgroundColor: colors.bg }}>
+					<NotificationBanner />
+					<View style={{ flex: 1 }}>
+						<Stack
+							screenOptions={{
+								headerShown: false,
+								contentStyle: { backgroundColor: colors.bg },
+							}}
+						>
+							<Stack.Screen name='(tabs)' />
+							<Stack.Screen
+								name='create'
+								options={{ presentation: 'modal' }}
+							/>
+							<Stack.Screen
+								name='edit'
+								options={{ presentation: 'modal' }}
+							/>
+							<Stack.Screen name='details' />
+						</Stack>
+					</View>
+				</View>
 			</SafeAreaProvider>
 		</GestureHandlerRootView>
 	);

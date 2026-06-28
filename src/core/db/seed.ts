@@ -14,11 +14,15 @@ export function seedDevData(): void {
 
 	const now = new Date();
 	const make = (
-		g: Omit<Goal, 'id' | 'sortOrder' | 'archived' | 'createdAt'>,
+		g: Omit<
+			Goal,
+			'id' | 'reminders' | 'sortOrder' | 'archived' | 'createdAt'
+		>,
 		i: number,
 	): Goal => ({
 		...g,
 		id: randomUUID(),
+		reminders: [],
 		sortOrder: i,
 		archived: false,
 		createdAt: subDays(now, 80).toISOString(),
