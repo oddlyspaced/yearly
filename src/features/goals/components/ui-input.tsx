@@ -37,7 +37,8 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 			<TextInput
 				ref={ref}
 				placeholderTextColor={colors.inkGhost}
-				selectionColor={colors.ink}
+				selectionColor='rgba(10,10,10,0.25)'
+				cursorColor={colors.ink}
 				style={[
 					{
 						fontFamily: fontFamily.bold,
@@ -57,7 +58,8 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 		<TextInput
 			ref={ref}
 			placeholderTextColor={colors.inkFaint}
-			selectionColor={colors.ink}
+			selectionColor='rgba(10,10,10,0.25)'
+			cursorColor={colors.ink}
 			style={[
 				{
 					height: 54,

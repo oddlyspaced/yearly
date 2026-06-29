@@ -93,6 +93,8 @@ export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
 							selectTextOnFocus
 							placeholder='0'
 							placeholderTextColor={colors.inkGhost}
+							selectionColor='rgba(10,10,10,0.25)'
+							cursorColor={colors.ink}
 							style={{
 								fontFamily: fontFamily.monoBold,
 								fontSize: fontSize.mega,

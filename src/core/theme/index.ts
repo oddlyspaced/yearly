@@ -72,22 +72,14 @@ export const fontFamily = {
 	monoBold: 'SpaceMono_700Bold',
 } as const;
 
-/** Soft, neutral-dark elevation (Fold uses navy-tinted; we keep it monochrome). */
+/**
+ * Soft, neutral shadows via the cross-platform `boxShadow` style prop (RN 0.76+).
+ * Unlike Android `elevation`, boxShadow renders correctly under animated/parent
+ * opacity (card entrance fades, dimmed completed cards) with no boxy artifact.
+ */
 export const shadow = {
-	card: {
-		shadowColor: '#0A0A0A',
-		shadowOpacity: 0.05,
-		shadowRadius: 10,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 2,
-	},
-	float: {
-		shadowColor: '#0A0A0A',
-		shadowOpacity: 0.12,
-		shadowRadius: 20,
-		shadowOffset: { width: 0, height: 10 },
-		elevation: 10,
-	},
+	card: { boxShadow: '0px 4px 12px rgba(10, 10, 10, 0.06)' },
+	float: { boxShadow: '0px 8px 24px rgba(10, 10, 10, 0.14)' },
 } as const;
 
 export const theme = { colors, spacing, radii, fontSize, fontFamily, shadow };
