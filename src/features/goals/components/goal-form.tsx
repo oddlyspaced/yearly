@@ -26,6 +26,7 @@ import {
 	Period,
 	Reminder,
 } from '@/core/domain/types';
+import { formatCount } from '@/core/domain/format';
 import { colors, spacing } from '@/core/theme';
 import {
 	Button,
@@ -138,7 +139,7 @@ export function GoalForm({
 		}
 		return `${AGGREGATION_LABELS[aggregation]} ${COMPARATOR_LABELS[
 			comparator
-		].toLowerCase()} ${targetNum}${unitStr} per ${suffix}.`;
+		].toLowerCase()} ${formatCount(targetNum)}${unitStr} per ${suffix}.`;
 	}, [type, period, targetNum, comparator, unit, aggregation]);
 
 	const handleSubmit = () => {

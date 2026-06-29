@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
-import { AnimatedNumber, IconButton, Text } from '@/core/ui';
-import { formatTargetLine, quickStep } from '@/core/domain/format';
+import { IconButton, Text } from '@/core/ui';
+import { formatCount, formatTargetLine, quickStep } from '@/core/domain/format';
 import { todayKey } from '@/core/domain/period';
 import { Entry, Goal } from '@/core/domain/types';
 import { useStore } from '@/core/store/useStore';
@@ -94,9 +94,9 @@ export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
 							placeholder='0'
 							placeholderTextColor={colors.inkGhost}
 							style={{
-								fontFamily: fontFamily.extrabold,
+								fontFamily: fontFamily.monoBold,
 								fontSize: fontSize.mega,
-								lineHeight: 56,
+								lineHeight: 58,
 								letterSpacing: -0.5,
 								color: colors.ink,
 								textAlign: 'center',
@@ -105,17 +105,15 @@ export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
 							}}
 						/>
 					) : (
-						<AnimatedNumber
-							value={value}
-							size={fontSize.mega}
+						<Text
+							variant='mega'
+							mono
 							weight='extrabold'
 							color={value > 0 ? colors.ink : colors.inkGhost}
-							style={{
-								lineHeight: 58,
-								letterSpacing: -0.5,
-								minWidth: 120,
-							}}
-						/>
+							style={{ minWidth: 120, textAlign: 'center' }}
+						>
+							{formatCount(value)}
+						</Text>
 					)}
 				</Pressable>
 
