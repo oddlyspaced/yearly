@@ -74,7 +74,12 @@ export function RemindersField({
 	};
 
 	return (
-		<View style={{ gap: spacing.sm }}>
+		<View style={{ gap: spacing.md }}>
+			<Text variant='caption' faint>
+				{value.length > 0
+					? `Sends “${message}” at each time.`
+					: 'Add a time to get a daily notification.'}
+			</Text>
 			<View
 				style={{
 					flexDirection: 'row',
@@ -175,12 +180,6 @@ export function RemindersField({
 					) : null}
 				</Animated.View>
 			) : null}
-
-			<Text variant='caption' faint>
-				{value.length > 0
-					? `Sends “${message}” at each time.`
-					: 'Add a time to get a daily notification.'}
-			</Text>
 		</View>
 	);
 }

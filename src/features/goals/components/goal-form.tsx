@@ -280,17 +280,6 @@ export function GoalForm({
 				/>
 			</Animated.View>
 
-			<Animated.View layout={reflow}>
-				<Divider />
-			</Animated.View>
-
-			{/* Live rule summary — always visible */}
-			<Animated.View layout={reflow}>
-				<Text variant='small' muted>
-					{cap(summary)}
-				</Text>
-			</Animated.View>
-
 			{/* Advanced — only numeric goals have advanced options */}
 			{type === 'numeric' ? (
 				<Animated.View
@@ -299,6 +288,7 @@ export function GoalForm({
 					layout={reflow}
 					style={{ gap: spacing.lg }}
 				>
+					<Divider />
 					<Pressable
 						onPress={toggleAdvanced}
 						style={{
@@ -307,9 +297,18 @@ export function GoalForm({
 							justifyContent: 'space-between',
 						}}
 					>
-						<Text variant='label' weight='semibold'>
-							Advanced
-						</Text>
+						<View>
+							<Text variant='label' weight='semibold'>
+								Advanced
+							</Text>
+							<Text
+								variant='small'
+								muted
+								style={{ marginTop: 2 }}
+							>
+								{cap(summary)}
+							</Text>
+						</View>
 						<Animated.View style={chevStyle}>
 							<Glyph
 								name='chevron-down'

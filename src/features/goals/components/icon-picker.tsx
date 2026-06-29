@@ -21,7 +21,7 @@ import { Glyph } from '@/core/ui';
 const EASE = Easing.out(Easing.cubic);
 const SELECT_DURATION = 220;
 const PRESS_DURATION = 110;
-const FADE_W = 24;
+const FADE_W = 44;
 const ROW_H = 64; // 48 badge + 8 vertical padding each side
 
 const AnimatedScrollView = Animated.ScrollView;

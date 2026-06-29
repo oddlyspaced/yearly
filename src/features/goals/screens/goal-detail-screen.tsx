@@ -116,7 +116,7 @@ export default function DetailsScreen() {
 					</Text>
 				</View>
 				<IconButton
-					name='settings'
+					name='edit-3'
 					onPress={() =>
 						router.push({
 							pathname: '/edit',
