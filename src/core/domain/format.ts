@@ -18,6 +18,12 @@ export function formatPrecise(n: number): string {
 	return n.toFixed(1);
 }
 
+/** Comma-grouped value (10500 → "10,500", 9.5 → "9.5") for inline labels. */
+export function formatCount(n: number): string {
+	if (!isFinite(n)) return '0';
+	return n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+}
+
 /** "of 10K steps / week · avg" style descriptor for a goal's target. */
 export function formatTargetLine(goal: Goal): string {
 	if (goal.type === 'checkbox') {
@@ -34,7 +40,7 @@ export function formatTargetLine(goal: Goal): string {
 				? ''
 				: ` ${AGGREGATION_LABELS[goal.aggregation].toLowerCase()}`;
 	const unit = goal.unit ? `${goal.unit} ` : '';
-	return `${formatValue(goal.targetValue)} ${unit}/ ${PERIOD_SUFFIX[goal.period]}${aggNote}`.trim();
+	return `${formatCount(goal.targetValue)} ${unit}/ ${PERIOD_SUFFIX[goal.period]}${aggNote}`.trim();
 }
 
 /** Sensible inline increment for a numeric goal based on its target magnitude. */

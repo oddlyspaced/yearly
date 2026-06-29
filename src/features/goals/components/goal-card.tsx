@@ -9,7 +9,7 @@ import {
 	evaluatePeriod,
 	isDayComplete,
 } from '@/core/domain/aggregation';
-import { formatValue, quickStep } from '@/core/domain/format';
+import { formatCount, quickStep } from '@/core/domain/format';
 import { periodRange } from '@/core/domain/period';
 import { Entry, Goal, PERIOD_SUFFIX } from '@/core/domain/types';
 import { colors, radii, shadow, spacing } from '@/core/theme';
@@ -18,6 +18,8 @@ interface GoalCardProps {
 	goal: Goal;
 	entries: Entry[];
 	todayEntry?: Entry;
+	/** Completed goals are dimmed and flattened (no shadow). */
+	dimmed?: boolean;
 	onPress: () => void;
 	onToggle: () => void;
 	onStep: (delta: number) => void;
@@ -44,8 +46,8 @@ function progressLabel(
 	}
 	const unit = goal.unit ?? '';
 	if (goal.period === 'daily') {
-		const t = goal.targetValue ? ` / ${formatValue(goal.targetValue)}` : '';
-		return `${formatValue(todayVal)}${t} ${unit}`.trim();
+		const t = goal.targetValue ? ` / ${formatCount(goal.targetValue)}` : '';
+		return `${formatCount(todayVal)}${t} ${unit}`.trim();
 	}
 	const res = evaluatePeriod(
 		goal,
@@ -53,8 +55,8 @@ function progressLabel(
 		periodRange(goal.period, new Date()),
 		new Date(),
 	);
-	const actual = formatValue(res.actual);
-	const t = goal.targetValue ? ` / ${formatValue(goal.targetValue)}` : '';
+	const actual = formatCount(res.actual);
+	const t = goal.targetValue ? ` / ${formatCount(goal.targetValue)}` : '';
 	return `${actual}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
 }
 
@@ -62,6 +64,7 @@ export const GoalCard = memo(function GoalCard({
 	goal,
 	entries,
 	todayEntry,
+	dimmed,
 	onPress,
 	onToggle,
 	onStep,
@@ -97,9 +100,9 @@ export const GoalCard = memo(function GoalCard({
 					padding: spacing.base,
 					backgroundColor: colors.surface,
 					borderRadius: radii.lg,
-					opacity: pressed ? 0.96 : 1,
+					opacity: dimmed ? 0.55 : pressed ? 0.96 : 1,
 				},
-				shadow.card,
+				dimmed ? null : shadow.card,
 			]}
 		>
 			<IconBadge

@@ -305,7 +305,6 @@ export default function TodayScreen() {
 										340,
 									).easing(Easing.bezier(0.22, 1, 0.36, 1))}
 									entering={FadeIn.duration(220)}
-									style={{ opacity: done ? 0.5 : 1 }}
 								>
 									<GoalCard
 										goal={g}
@@ -313,6 +312,7 @@ export default function TodayScreen() {
 											(e) => e.goalId === g.id,
 										)}
 										todayEntry={entryFor(entries, g.id)}
+										dimmed={done}
 										onPress={() =>
 											router.push({
 												pathname: '/details',
