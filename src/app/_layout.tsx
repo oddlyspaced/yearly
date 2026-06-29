@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { AppState, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
@@ -17,10 +17,20 @@ export default function RootLayout() {
 	const fontsLoaded = useAppFonts();
 	const init = useStore((s) => s.init);
 	const ready = useStore((s) => s.ready);
+	const refreshNotifPermission = useStore((s) => s.refreshNotifPermission);
 
 	useEffect(() => {
 		init();
 	}, [init]);
+
+	// Re-check notification permission when returning from the background
+	// (e.g. after enabling it in Settings) so the banner clears.
+	useEffect(() => {
+		const sub = AppState.addEventListener('change', (state) => {
+			if (state === 'active') refreshNotifPermission();
+		});
+		return () => sub.remove();
+	}, [refreshNotifPermission]);
 
 	useEffect(() => {
 		if (fontsLoaded && ready) SplashScreen.hideAsync().catch(() => {});
