@@ -11,7 +11,7 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import { Feather } from '@expo/vector-icons';
 
-import { Reminder } from '@/core/domain/types';
+import { GoalType, Reminder } from '@/core/domain/types';
 import { haptics } from '@/core/lib/haptics';
 import { colors, radii, spacing } from '@/core/theme';
 import { Button, Text } from '@/core/ui';
@@ -19,6 +19,8 @@ import { Button, Text } from '@/core/ui';
 interface RemindersFieldProps {
 	value: Reminder[];
 	onChange: (reminders: Reminder[]) => void;
+	goalName: string;
+	goalType: GoalType;
 }
 
 const pad = (n: number): string => String(n).padStart(2, '0');
@@ -31,11 +33,21 @@ function defaultPickerDate(): Date {
 	return d;
 }
 
-export function RemindersField({ value, onChange }: RemindersFieldProps) {
+export function RemindersField({
+	value,
+	onChange,
+	goalName,
+	goalType,
+}: RemindersFieldProps) {
 	const [picking, setPicking] = useState(false);
 	const [temp, setTemp] = useState<Date>(defaultPickerDate);
 
 	const sorted = [...value].sort((a, b) => keyOf(a) - keyOf(b));
+
+	const message =
+		goalType === 'checkbox'
+			? `Time to check off ${goalName}`
+			: `Time to log your ${goalName}`;
 
 	const commit = (date: Date) => {
 		const next: Reminder = {
@@ -163,6 +175,12 @@ export function RemindersField({ value, onChange }: RemindersFieldProps) {
 					) : null}
 				</Animated.View>
 			) : null}
+
+			<Text variant='caption' faint>
+				{value.length > 0
+					? `Sends “${message}” at each time.`
+					: 'Add a time to get a daily notification.'}
+			</Text>
 		</View>
 	);
 }

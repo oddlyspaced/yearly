@@ -35,11 +35,9 @@ import {
 	SegmentedControl,
 	Text,
 } from '@/core/ui';
-import {
-	ChipSelector,
-	ColorPicker,
-	IconPicker,
-} from '@/features/goals/components/pickers';
+import { ChipSelector } from '@/features/goals/components/chip-selector';
+import { IconPicker } from '@/features/goals/components/icon-picker';
+import { ColorPicker } from '@/features/goals/components/color-picker';
 import { Input } from '@/features/goals/components/ui-input';
 import { RemindersField } from '@/features/goals/components/reminders-field';
 
@@ -274,79 +272,93 @@ export function GoalForm({
 			{/* Reminders */}
 			<Animated.View layout={reflow}>
 				<SectionLabel>Reminders</SectionLabel>
-				<RemindersField value={reminders} onChange={setReminders} />
+				<RemindersField
+					value={reminders}
+					onChange={setReminders}
+					goalName={name.trim() || 'this goal'}
+					goalType={type}
+				/>
 			</Animated.View>
 
 			<Animated.View layout={reflow}>
 				<Divider />
 			</Animated.View>
 
-			{/* Advanced */}
-			<Animated.View layout={reflow} style={{ gap: spacing.lg }}>
-				<Pressable
-					onPress={toggleAdvanced}
-					style={{
-						flexDirection: 'row',
-						alignItems: 'center',
-						justifyContent: 'space-between',
-					}}
-				>
-					<Text variant='label' weight='semibold'>
-						Advanced
-					</Text>
-					<Animated.View style={chevStyle}>
-						<Glyph
-							name='chevron-down'
-							size={20}
-							color={colors.inkMuted}
-						/>
-					</Animated.View>
-				</Pressable>
-
-				{/* Live rule summary — always visible */}
+			{/* Live rule summary — always visible */}
+			<Animated.View layout={reflow}>
 				<Text variant='small' muted>
 					{cap(summary)}
 				</Text>
-
-				{advanced && type === 'numeric' ? (
-					<Animated.View
-						entering={enter}
-						exiting={exit}
-						layout={reflow}
-						style={{ gap: spacing.lg }}
-					>
-						<View>
-							<SectionLabel>Aggregation</SectionLabel>
-							<ChipSelector<Aggregation>
-								options={NUMERIC_AGGREGATIONS.map((a) => ({
-									label: AGGREGATION_LABELS[a],
-									value: a,
-								}))}
-								value={aggregation}
-								onChange={setAggregation}
-							/>
-						</View>
-
-						<View>
-							<SectionLabel>Goal</SectionLabel>
-							<SegmentedControl<Comparator>
-								options={[
-									{
-										label: COMPARATOR_LABELS.at_least,
-										value: 'at_least',
-									},
-									{
-										label: COMPARATOR_LABELS.at_most,
-										value: 'at_most',
-									},
-								]}
-								value={comparator}
-								onChange={setComparator}
-							/>
-						</View>
-					</Animated.View>
-				) : null}
 			</Animated.View>
+
+			{/* Advanced — only numeric goals have advanced options */}
+			{type === 'numeric' ? (
+				<Animated.View
+					entering={enter}
+					exiting={exit}
+					layout={reflow}
+					style={{ gap: spacing.lg }}
+				>
+					<Pressable
+						onPress={toggleAdvanced}
+						style={{
+							flexDirection: 'row',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+						}}
+					>
+						<Text variant='label' weight='semibold'>
+							Advanced
+						</Text>
+						<Animated.View style={chevStyle}>
+							<Glyph
+								name='chevron-down'
+								size={20}
+								color={colors.inkMuted}
+							/>
+						</Animated.View>
+					</Pressable>
+
+					{advanced ? (
+						<Animated.View
+							entering={enter}
+							exiting={exit}
+							layout={reflow}
+							style={{ gap: spacing.lg }}
+						>
+							<View>
+								<SectionLabel>Aggregation</SectionLabel>
+								<ChipSelector<Aggregation>
+									options={NUMERIC_AGGREGATIONS.map((a) => ({
+										label: AGGREGATION_LABELS[a],
+										value: a,
+									}))}
+									value={aggregation}
+									onChange={setAggregation}
+								/>
+							</View>
+
+							<View>
+								<SectionLabel>Goal</SectionLabel>
+								<SegmentedControl<Comparator>
+									options={[
+										{
+											label: COMPARATOR_LABELS.at_least,
+											value: 'at_least',
+										},
+										{
+											label: COMPARATOR_LABELS.at_most,
+											value: 'at_most',
+										},
+									]}
+									value={comparator}
+									onChange={setComparator}
+								/>
+							</View>
+						</Animated.View>
+					) : null}
+				</Animated.View>
+			) : null}
 
 			<Animated.View layout={reflow}>
 				<Divider />

@@ -3,17 +3,15 @@ export { Button } from './Button';
 export { ProgressRing } from './ProgressRing';
 export { Sparkline } from './Sparkline';
 export { AnimatedNumber } from './AnimatedNumber';
-export {
-	Card,
-	PressableCard,
-	Glyph,
-	IconBadge,
-	IconButton,
-	Divider,
-	SectionLabel,
-	Pill,
-	SegmentedControl,
-	ScreenHeader,
-	StatTile,
-	Row,
-} from './primitives';
+export { Glyph } from './Glyph';
+export { Card } from './Card';
+export { PressableCard } from './PressableCard';
+export { IconBadge } from './IconBadge';
+export { IconButton } from './IconButton';
+export { Divider } from './Divider';
+export { SectionLabel } from './SectionLabel';
+export { Pill } from './Pill';
+export { SegmentedControl } from './SegmentedControl';
+export { ScreenHeader } from './ScreenHeader';
+export { StatTile } from './StatTile';
+export { Row } from './Row';
