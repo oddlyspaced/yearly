@@ -16,8 +16,12 @@ import { colors, radii, shadow, spacing } from '@/core/theme';
 
 interface GoalCardProps {
 	goal: Goal;
+	/** All entries for this goal. */
 	entries: Entry[];
-	todayEntry?: Entry;
+	/** Entry for the day being shown. */
+	entry?: Entry;
+	/** The day this card represents (defaults to today). */
+	refDate?: Date;
 	/** Completed goals are dimmed and flattened (no shadow). */
 	dimmed?: boolean;
 	onPress: () => void;
@@ -28,42 +32,41 @@ interface GoalCardProps {
 function progressLabel(
 	goal: Goal,
 	entries: Entry[],
-	todayEntry?: Entry,
+	refDate: Date,
+	entry?: Entry,
 ): string {
-	const todayVal = todayEntry?.state === 'logged' ? todayEntry.value : 0;
+	const val = entry?.state === 'logged' ? entry.value : 0;
 	if (goal.type === 'checkbox') {
 		if (goal.period === 'daily')
-			return isDayComplete(goal, todayEntry)
-				? 'Done for today'
-				: 'Not yet';
+			return isDayComplete(goal, entry) ? 'Done' : 'Not yet';
 		const res = evaluatePeriod(
 			goal,
 			entries,
-			periodRange(goal.period, new Date()),
-			new Date(),
+			periodRange(goal.period, refDate),
+			refDate,
 		);
 		return `${res.actual} / ${res.target} this ${PERIOD_SUFFIX[goal.period]}`;
 	}
 	const unit = goal.unit ?? '';
 	if (goal.period === 'daily') {
 		const t = goal.targetValue ? ` / ${formatCount(goal.targetValue)}` : '';
-		return `${formatCount(todayVal)}${t} ${unit}`.trim();
+		return `${formatCount(val)}${t} ${unit}`.trim();
 	}
 	const res = evaluatePeriod(
 		goal,
 		entries,
-		periodRange(goal.period, new Date()),
-		new Date(),
+		periodRange(goal.period, refDate),
+		refDate,
 	);
-	const actual = formatCount(res.actual);
 	const t = goal.targetValue ? ` / ${formatCount(goal.targetValue)}` : '';
-	return `${actual}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
+	return `${formatCount(res.actual)}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
 }
 
 export const GoalCard = memo(function GoalCard({
 	goal,
 	entries,
-	todayEntry,
+	entry,
+	refDate = new Date(),
 	dimmed,
 	onPress,
 	onToggle,
@@ -71,17 +74,18 @@ export const GoalCard = memo(function GoalCard({
 }: GoalCardProps) {
 	const ringProgress =
 		goal.period === 'daily'
-			? dayCompletion(goal, todayEntry)
+			? dayCompletion(goal, entry)
 			: evaluatePeriod(
 					goal,
 					entries,
-					periodRange(goal.period, new Date()),
-					new Date(),
+					periodRange(goal.period, refDate),
+					refDate,
 				).pct;
 	const complete =
 		goal.period === 'daily'
-			? isDayComplete(goal, todayEntry)
+			? isDayComplete(goal, entry)
 			: ringProgress >= 1;
+
 	const stepStyle = {
 		width: 36,
 		height: 36,
@@ -122,7 +126,7 @@ export const GoalCard = memo(function GoalCard({
 					style={{ marginTop: 1 }}
 					numberOfLines={1}
 				>
-					{progressLabel(goal, entries, todayEntry)}
+					{progressLabel(goal, entries, refDate, entry)}
 				</Text>
 			</View>
 

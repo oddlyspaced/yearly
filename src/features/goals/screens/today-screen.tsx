@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import Animated, {
 	Easing,
 	FadeIn,
@@ -7,11 +8,12 @@ import Animated, {
 	LinearTransition,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
-import { eachDayOfInterval, format } from 'date-fns';
+import { addDays, eachDayOfInterval, format, subDays } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoalCard } from '@/features/goals/components/goal-card';
 import { Button, Card, Divider, IconBadge, IconButton, Text } from '@/core/ui';
+import { haptics } from '@/core/lib/haptics';
 import {
 	dayCompletion,
 	evaluatePeriod,
@@ -20,35 +22,34 @@ import {
 } from '@/core/domain/aggregation';
 import { greeting } from '@/core/domain/format';
 import {
+	fromDateKey,
 	periodRange,
 	startOfDay,
 	toDateKey,
 	todayKey,
 } from '@/core/domain/period';
-import { Goal } from '@/core/domain/types';
+import { Entry, Goal } from '@/core/domain/types';
 import { entryFor, useStore } from '@/core/store/useStore';
-import { colors, spacing } from '@/core/theme';
+import { colors, radii, spacing } from '@/core/theme';
 
-function isCompleteToday(
+function isCompleteOn(
 	goal: Goal,
-	entries: ReturnType<typeof useStore.getState>['entries'],
+	entries: Entry[],
+	dateKey: string,
+	date: Date,
 ): boolean {
-	const today = entryFor(entries, goal.id);
-	if (goal.period === 'daily') return isDayComplete(goal, today);
+	if (goal.period === 'daily')
+		return isDayComplete(goal, entryFor(entries, goal.id, dateKey));
 	return evaluatePeriod(
 		goal,
 		entries.filter((e) => e.goalId === goal.id),
-		periodRange(goal.period, new Date()),
-		new Date(),
+		periodRange(goal.period, date),
+		date,
 	).met;
 }
 
 /** Mean single-day completion across goals active on `date`, in [0,1]. */
-function dayRatio(
-	goals: Goal[],
-	entries: ReturnType<typeof useStore.getState>['entries'],
-	date: Date,
-): number {
+function dayRatio(goals: Goal[], entries: Entry[], date: Date): number {
 	const key = toDateKey(date);
 	const activeThatDay = goals.filter((g) => isGoalActiveOn(g, date));
 	if (activeThatDay.length === 0) return 0;
@@ -65,13 +66,39 @@ export default function TodayScreen() {
 	const entries = useStore((s) => s.entries);
 	const setValue = useStore((s) => s.setValue);
 	const toggleDone = useStore((s) => s.toggleDone);
-	const active = useMemo(() => goals.filter((g) => !g.archived), [goals]);
+
+	const [selectedKey, setSelectedKey] = useState(todayKey());
+	const selectedDate = useMemo(() => fromDateKey(selectedKey), [selectedKey]);
+	const isToday = selectedKey === todayKey();
+	const isYesterday = selectedKey === toDateKey(subDays(new Date(), 1));
+
+	const dateLabel = isToday
+		? 'Today'
+		: isYesterday
+			? 'Yesterday'
+			: format(selectedDate, 'EEE, MMM d');
+
+	const goPrev = () => {
+		haptics.selection();
+		setSelectedKey(toDateKey(subDays(selectedDate, 1)));
+	};
+	const goNext = () => {
+		if (isToday) return;
+		haptics.selection();
+		setSelectedKey(toDateKey(addDays(selectedDate, 1)));
+	};
+
+	const active = useMemo(
+		() => goals.filter((g) => isGoalActiveOn(g, selectedDate)),
+		[goals, selectedDate],
+	);
 
 	const { ordered, completedIds, doneCount } = useMemo(() => {
 		const inc: Goal[] = [];
 		const done: Goal[] = [];
 		for (const g of active) {
-			if (isCompleteToday(g, entries)) done.push(g);
+			if (isCompleteOn(g, entries, selectedKey, selectedDate))
+				done.push(g);
 			else inc.push(g);
 		}
 		return {
@@ -79,27 +106,19 @@ export default function TodayScreen() {
 			completedIds: new Set(done.map((g) => g.id)),
 			doneCount: done.length,
 		};
-	}, [active, entries]);
+	}, [active, entries, selectedKey, selectedDate]);
 
 	const stats = useMemo(() => {
-		const today = new Date();
 		const total = active.length;
-		const todayPct = total
-			? Math.round(
-					(active.reduce(
-						(acc, g) =>
-							acc + dayCompletion(g, entryFor(entries, g.id)),
-						0,
-					) /
-						total) *
-						100,
-				)
+		const dayPct = total
+			? Math.round(dayRatio(active, entries, selectedDate) * 100)
 			: 0;
 
-		const week = periodRange('weekly', today);
+		const week = periodRange('weekly', selectedDate);
+		const end = startOfDay(selectedDate);
 		const elapsed = eachDayOfInterval({
 			start: week.start,
-			end: startOfDay(today),
+			end: end < week.end ? end : week.end,
 		});
 		const weekRatios = elapsed.map((d) => dayRatio(active, entries, d));
 		const weekAvgPct = weekRatios.length
@@ -110,17 +129,17 @@ export default function TodayScreen() {
 				)
 			: 0;
 
-		return { total, todayPct, weekAvgPct };
-	}, [active, entries]);
+		return { total, dayPct, weekAvgPct };
+	}, [active, entries, selectedDate]);
 
 	const handleStep = (goal: Goal, delta: number) => {
-		const cur = entryFor(entries, goal.id);
+		const cur = entryFor(entries, goal.id, selectedKey);
 		const base = cur?.state === 'logged' ? cur.value : 0;
-		setValue(goal.id, todayKey(), Math.max(0, base + delta));
+		setValue(goal.id, selectedKey, Math.max(0, base + delta));
 	};
 
 	const statRow: { value: string; label: string }[] = [
-		{ value: `${doneCount}/${stats.total}`, label: 'Today' },
+		{ value: `${doneCount}/${stats.total}`, label: 'Done' },
 		{ value: `${stats.weekAvgPct}%`, label: 'This week' },
 		{ value: `${stats.total}`, label: 'Goals' },
 	];
@@ -165,43 +184,82 @@ export default function TodayScreen() {
 					/>
 				</View>
 
-				{/* Hero summary */}
+				{/* Hero summary with date stepper */}
 				{active.length > 0 && (
 					<Animated.View entering={FadeInDown.duration(360)}>
 						<Card style={{ marginTop: spacing.lg }}>
 							<View
 								style={{
 									flexDirection: 'row',
-									alignItems: 'flex-start',
+									alignItems: 'center',
 									justifyContent: 'space-between',
 								}}
 							>
-								<View>
-									<Text variant='label' weight='bold'>
-										Today
-									</Text>
-									<Text
-										variant='small'
-										muted
-										style={{ marginTop: 2 }}
-									>
-										{format(new Date(), 'MMMM d, yyyy')}
-									</Text>
-								</View>
 								<View
 									style={{
 										flexDirection: 'row',
-										alignItems: 'flex-end',
+										alignItems: 'center',
+										backgroundColor: colors.surfaceStrong,
+										borderRadius: radii.pill,
+										paddingHorizontal: 4,
+										height: 40,
 									}}
 								>
-									<Text
-										mono
-										weight='extrabold'
-										style={{ fontSize: 46, lineHeight: 52 }}
+									<Pressable
+										onPress={goPrev}
+										hitSlop={6}
+										style={{
+											paddingHorizontal: spacing.sm,
+											height: 40,
+											justifyContent: 'center',
+										}}
 									>
-										{stats.todayPct}%
-									</Text>
+										<Feather
+											name='chevron-left'
+											size={18}
+											color={colors.ink}
+										/>
+									</Pressable>
+									<Animated.View
+										key={selectedKey}
+										entering={FadeIn.duration(200)}
+									>
+										<Text
+											variant='small'
+											weight='bold'
+											center
+											style={{ minWidth: 76 }}
+										>
+											{dateLabel}
+										</Text>
+									</Animated.View>
+									<Pressable
+										onPress={goNext}
+										hitSlop={6}
+										style={{
+											paddingHorizontal: spacing.sm,
+											height: 40,
+											justifyContent: 'center',
+										}}
+									>
+										<Feather
+											name='chevron-right'
+											size={18}
+											color={
+												isToday
+													? colors.inkGhost
+													: colors.ink
+											}
+										/>
+									</Pressable>
 								</View>
+								<Text
+									mono
+									weight='extrabold'
+									style={{ fontSize: 44, lineHeight: 50 }}
+								>
+									{stats.dayPct}%
+								</Text>
 							</View>
 
 							<Divider style={{ marginVertical: spacing.lg }} />
@@ -272,24 +330,35 @@ export default function TodayScreen() {
 							size={64}
 							style={{ marginBottom: spacing.base }}
 						/>
-						<Text variant='heading' center>
-							Start with one goal
-						</Text>
-						<Text
-							variant='body'
-							muted
-							center
-							style={{ marginTop: spacing.xs, maxWidth: 260 }}
-						>
-							Track anything — a checkbox or a number with your
-							own unit.
-						</Text>
-						<Button
-							icon='plus'
-							label='Create your first goal'
-							onPress={() => router.push('/create')}
-							style={{ marginTop: spacing.lg }}
-						/>
+						{isToday ? (
+							<>
+								<Text variant='heading' center>
+									Start with one goal
+								</Text>
+								<Text
+									variant='body'
+									muted
+									center
+									style={{
+										marginTop: spacing.xs,
+										maxWidth: 260,
+									}}
+								>
+									Track anything — a checkbox or a number with
+									your own unit.
+								</Text>
+								<Button
+									icon='plus'
+									label='Create your first goal'
+									onPress={() => router.push('/create')}
+									style={{ marginTop: spacing.lg }}
+								/>
+							</>
+						) : (
+							<Text variant='body' muted center>
+								No goals were tracked on this day.
+							</Text>
+						)}
 					</View>
 				)}
 
@@ -311,7 +380,12 @@ export default function TodayScreen() {
 										entries={entries.filter(
 											(e) => e.goalId === g.id,
 										)}
-										todayEntry={entryFor(entries, g.id)}
+										entry={entryFor(
+											entries,
+											g.id,
+											selectedKey,
+										)}
+										refDate={selectedDate}
 										dimmed={done}
 										onPress={() =>
 											router.push({
@@ -320,7 +394,7 @@ export default function TodayScreen() {
 											})
 										}
 										onToggle={() =>
-											toggleDone(g.id, todayKey())
+											toggleDone(g.id, selectedKey)
 										}
 										onStep={(d) => handleStep(g, d)}
 									/>
