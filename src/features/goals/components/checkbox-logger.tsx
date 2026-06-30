@@ -10,7 +10,6 @@ import { Feather } from '@expo/vector-icons';
 import { ProgressRing, Text } from '@/core/ui';
 import { isDayComplete } from '@/core/domain/aggregation';
 import { formatTargetLine } from '@/core/domain/format';
-import { todayKey } from '@/core/domain/period';
 import { Entry, Goal } from '@/core/domain/types';
 import { colors, spacing } from '@/core/theme';
 import { haptics } from '@/core/lib/haptics';
@@ -20,12 +19,14 @@ const TIMING = { duration: 160, easing: Easing.out(Easing.cubic) };
 
 interface CheckboxLoggerProps {
 	goal: Goal;
-	todayEntry?: Entry;
+	/** Day being logged. */
+	dateKey: string;
+	entry?: Entry;
 }
 
-export function CheckboxLogger({ goal, todayEntry }: CheckboxLoggerProps) {
+export function CheckboxLogger({ goal, dateKey, entry }: CheckboxLoggerProps) {
 	const toggleDone = useStore((s) => s.toggleDone);
-	const done = isDayComplete(goal, todayEntry);
+	const done = isDayComplete(goal, entry);
 
 	const scale = useSharedValue(1);
 	const ringStyle = useAnimatedStyle(() => ({
@@ -38,7 +39,7 @@ export function CheckboxLogger({ goal, todayEntry }: CheckboxLoggerProps) {
 				onPress={() => {
 					if (done) haptics.light();
 					else haptics.success();
-					toggleDone(goal.id, todayKey());
+					toggleDone(goal.id, dateKey);
 				}}
 				onPressIn={() => {
 					scale.value = withTiming(0.92, TIMING);
@@ -71,7 +72,7 @@ export function CheckboxLogger({ goal, todayEntry }: CheckboxLoggerProps) {
 				center
 				style={{ marginTop: spacing.lg }}
 			>
-				{done ? 'Done for today' : 'Mark as done'}
+				{done ? 'Done' : 'Mark as done'}
 			</Text>
 
 			<Text

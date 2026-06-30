@@ -14,11 +14,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CheckboxLogger } from '@/features/goals/components/checkbox-logger';
+import { DateStepper } from '@/features/goals/components/date-stepper';
 import { DetailStats } from '@/features/goals/components/detail-stats';
 import { DisplayMode, MonthGrid } from '@/features/goals/components/month-grid';
 import { NumericLogger } from '@/features/goals/components/numeric-logger';
 import { Card, Glyph, IconButton, SegmentedControl, Text } from '@/core/ui';
-import { fromDateKey, startOfDay } from '@/core/domain/period';
+import { fromDateKey, startOfDay, todayKey } from '@/core/domain/period';
 import { entriesForGoal, entryFor, useStore } from '@/core/store/useStore';
 import { haptics } from '@/core/lib/haptics';
 import { colors, radii, spacing } from '@/core/theme';
@@ -31,6 +32,7 @@ export default function DetailsScreen() {
 	const [displayMode, setDisplayMode] = useState<DisplayMode>('value');
 	const [month, setMonth] = useState(() => startOfMonth(new Date()));
 	const [dir, setDir] = useState(1);
+	const [logKey, setLogKey] = useState(todayKey());
 
 	if (!goal) {
 		return (
@@ -76,7 +78,7 @@ export default function DetailsScreen() {
 	}
 
 	const goalEntries = entriesForGoal(allEntries, goal.id);
-	const todayEntry = entryFor(allEntries, goal.id);
+	const logEntry = entryFor(allEntries, goal.id, logKey);
 
 	const createdMonth = startOfMonth(
 		startOfDay(fromDateKey(goal.createdAt.slice(0, 10))),
@@ -136,16 +138,25 @@ export default function DetailsScreen() {
 			>
 				{/* Logging hero */}
 				<Animated.View entering={FadeInDown.duration(340)}>
-					<Card style={{ paddingVertical: spacing.xxl }}>
+					<Card
+						style={{ paddingVertical: spacing.xl, gap: spacing.lg }}
+					>
+						<DateStepper
+							dateKey={logKey}
+							onChange={setLogKey}
+							style={{ alignSelf: 'center' }}
+						/>
 						{goal.type === 'numeric' ? (
 							<NumericLogger
 								goal={goal}
-								todayEntry={todayEntry}
+								dateKey={logKey}
+								entry={logEntry}
 							/>
 						) : (
 							<CheckboxLogger
 								goal={goal}
-								todayEntry={todayEntry}
+								dateKey={logKey}
+								entry={logEntry}
 							/>
 						)}
 					</Card>

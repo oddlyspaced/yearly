@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { ScrollView, View } from 'react-native';
 import Animated, {
 	Easing,
 	FadeIn,
@@ -12,6 +11,7 @@ import { addDays, eachDayOfInterval, format, subDays } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoalCard } from '@/features/goals/components/goal-card';
+import { DateStepper } from '@/features/goals/components/date-stepper';
 import { Button, Card, Divider, IconBadge, IconButton, Text } from '@/core/ui';
 import { haptics } from '@/core/lib/haptics';
 import {
@@ -70,23 +70,6 @@ export default function TodayScreen() {
 	const [selectedKey, setSelectedKey] = useState(todayKey());
 	const selectedDate = useMemo(() => fromDateKey(selectedKey), [selectedKey]);
 	const isToday = selectedKey === todayKey();
-	const isYesterday = selectedKey === toDateKey(subDays(new Date(), 1));
-
-	const dateLabel = isToday
-		? 'Today'
-		: isYesterday
-			? 'Yesterday'
-			: format(selectedDate, 'EEE, MMM d');
-
-	const goPrev = () => {
-		haptics.selection();
-		setSelectedKey(toDateKey(subDays(selectedDate, 1)));
-	};
-	const goNext = () => {
-		if (isToday) return;
-		haptics.selection();
-		setSelectedKey(toDateKey(addDays(selectedDate, 1)));
-	};
 
 	const active = useMemo(
 		() => goals.filter((g) => isGoalActiveOn(g, selectedDate)),
@@ -195,64 +178,10 @@ export default function TodayScreen() {
 									justifyContent: 'space-between',
 								}}
 							>
-								<View
-									style={{
-										flexDirection: 'row',
-										alignItems: 'center',
-										backgroundColor: colors.surfaceStrong,
-										borderRadius: radii.pill,
-										paddingHorizontal: 4,
-										height: 40,
-									}}
-								>
-									<Pressable
-										onPress={goPrev}
-										hitSlop={6}
-										style={{
-											paddingHorizontal: spacing.sm,
-											height: 40,
-											justifyContent: 'center',
-										}}
-									>
-										<Feather
-											name='chevron-left'
-											size={18}
-											color={colors.ink}
-										/>
-									</Pressable>
-									<Animated.View
-										key={selectedKey}
-										entering={FadeIn.duration(200)}
-									>
-										<Text
-											variant='small'
-											weight='bold'
-											center
-											style={{ minWidth: 76 }}
-										>
-											{dateLabel}
-										</Text>
-									</Animated.View>
-									<Pressable
-										onPress={goNext}
-										hitSlop={6}
-										style={{
-											paddingHorizontal: spacing.sm,
-											height: 40,
-											justifyContent: 'center',
-										}}
-									>
-										<Feather
-											name='chevron-right'
-											size={18}
-											color={
-												isToday
-													? colors.inkGhost
-													: colors.ink
-											}
-										/>
-									</Pressable>
-								</View>
+								<DateStepper
+									dateKey={selectedKey}
+									onChange={setSelectedKey}
+								/>
 								<Text
 									mono
 									weight='extrabold'

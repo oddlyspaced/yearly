@@ -43,14 +43,12 @@ export function formatTargetLine(goal: Goal): string {
 	return `${formatCount(goal.targetValue)} ${unit}/ ${PERIOD_SUFFIX[goal.period]}${aggNote}`.trim();
 }
 
-/** Sensible inline increment for a numeric goal based on its target magnitude. */
+/** Sensible inline increment for a numeric goal — capped at 100. */
 export function quickStep(goal: Goal): number {
 	const t = goal.targetValue ?? 0;
 	if (t <= 20) return 1;
 	if (t <= 200) return 10;
-	if (t <= 2000) return 100;
-	if (t <= 20000) return 500;
-	return 1000;
+	return 100;
 }
 
 export function greeting(d: Date = new Date()): string {

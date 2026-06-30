@@ -3,7 +3,6 @@ import { Pressable, TextInput, View } from 'react-native';
 
 import { IconButton, Text } from '@/core/ui';
 import { formatCount, formatTargetLine, quickStep } from '@/core/domain/format';
-import { todayKey } from '@/core/domain/period';
 import { Entry, Goal } from '@/core/domain/types';
 import { useStore } from '@/core/store/useStore';
 import { haptics } from '@/core/lib/haptics';
@@ -11,12 +10,14 @@ import { colors, fontFamily, fontSize, radii, spacing } from '@/core/theme';
 
 interface NumericLoggerProps {
 	goal: Goal;
-	todayEntry?: Entry;
+	/** Day being logged. */
+	dateKey: string;
+	entry?: Entry;
 }
 
-export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
+export function NumericLogger({ goal, dateKey, entry }: NumericLoggerProps) {
 	const setValue = useStore((s) => s.setValue);
-	const value = todayEntry?.state === 'logged' ? todayEntry.value : 0;
+	const value = entry?.state === 'logged' ? entry.value : 0;
 
 	const step = quickStep(goal);
 	const [editing, setEditing] = useState(false);
@@ -33,14 +34,14 @@ export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
 
 	const commit = () => {
 		const n = parseFloat(draft.replace(/,/g, ''));
-		setValue(goal.id, todayKey(), isFinite(n) ? n : null);
+		setValue(goal.id, dateKey, isFinite(n) ? n : null);
 		setEditing(false);
 	};
 
 	const bump = (delta: number) => {
 		haptics.light();
 		const next = Math.max(0, value + delta);
-		setValue(goal.id, todayKey(), next > 0 ? next : null);
+		setValue(goal.id, dateKey, next > 0 ? next : null);
 	};
 
 	const stepStyle = {
@@ -111,6 +112,8 @@ export function NumericLogger({ goal, todayEntry }: NumericLoggerProps) {
 							variant='mega'
 							mono
 							weight='extrabold'
+							numberOfLines={1}
+							adjustsFontSizeToFit
 							color={value > 0 ? colors.ink : colors.inkGhost}
 							style={{ minWidth: 120, textAlign: 'center' }}
 						>
