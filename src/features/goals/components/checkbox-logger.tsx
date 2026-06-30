@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 import Animated, {
 	Easing,
+	FadeIn,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
@@ -50,41 +51,46 @@ export function CheckboxLogger({ goal, dateKey, entry }: CheckboxLoggerProps) {
 				hitSlop={16}
 			>
 				<Animated.View style={ringStyle}>
-					<ProgressRing
-						progress={done ? 1 : 0}
-						size={132}
-						stroke={6}
-						fillWhenComplete
-						trackColor={colors.surfaceStrong}
+					<Animated.View
+						key={dateKey}
+						entering={FadeIn.duration(300)}
 					>
-						<Feather
-							name='check'
-							size={50}
-							color={done ? colors.onAccent : colors.inkGhost}
-						/>
-					</ProgressRing>
+						<ProgressRing
+							progress={done ? 1 : 0}
+							size={132}
+							stroke={6}
+							fillWhenComplete
+							trackColor={colors.surfaceStrong}
+						>
+							<Feather
+								name='check'
+								size={50}
+								color={done ? colors.onAccent : colors.inkGhost}
+							/>
+						</ProgressRing>
+					</Animated.View>
 				</Animated.View>
 			</Pressable>
 
-			<Text
-				variant='heading'
-				weight='bold'
-				center
-				style={{ marginTop: spacing.lg }}
+			<Animated.View
+				key={dateKey}
+				entering={FadeIn.duration(300)}
+				style={{ alignItems: 'center', marginTop: spacing.lg }}
 			>
-				{done ? 'Done' : 'Mark as done'}
-			</Text>
-
-			<Text
-				variant='small'
-				muted
-				center
-				style={{ marginTop: spacing.xs }}
-			>
-				{done
-					? 'Tap to undo'
-					: `Tap the circle · ${formatTargetLine(goal)}`}
-			</Text>
+				<Text variant='heading' weight='bold' center>
+					{done ? 'Done' : 'Mark as done'}
+				</Text>
+				<Text
+					variant='small'
+					muted
+					center
+					style={{ marginTop: spacing.xs }}
+				>
+					{done
+						? 'Tap to undo'
+						: `Tap the circle · ${formatTargetLine(goal)}`}
+				</Text>
+			</Animated.View>
 		</View>
 	);
 }

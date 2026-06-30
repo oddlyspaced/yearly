@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { IconButton, Text } from '@/core/ui';
 import { formatCount, formatTargetLine, quickStep } from '@/core/domain/format';
@@ -108,17 +109,22 @@ export function NumericLogger({ goal, dateKey, entry }: NumericLoggerProps) {
 							}}
 						/>
 					) : (
-						<Text
-							variant='mega'
-							mono
-							weight='extrabold'
-							numberOfLines={1}
-							adjustsFontSizeToFit
-							color={value > 0 ? colors.ink : colors.inkGhost}
-							style={{ minWidth: 120, textAlign: 'center' }}
+						<Animated.View
+							key={dateKey}
+							entering={FadeIn.duration(260)}
 						>
-							{formatCount(value)}
-						</Text>
+							<Text
+								variant='mega'
+								mono
+								weight='extrabold'
+								numberOfLines={1}
+								adjustsFontSizeToFit
+								color={value > 0 ? colors.ink : colors.inkGhost}
+								style={{ minWidth: 120, textAlign: 'center' }}
+							>
+								{formatCount(value)}
+							</Text>
+						</Animated.View>
 					)}
 				</Pressable>
 
