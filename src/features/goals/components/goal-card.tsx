@@ -72,19 +72,21 @@ export const GoalCard = memo(function GoalCard({
 	onToggle,
 	onStep,
 }: GoalCardProps) {
-	// A checkbox toggles a single day, so its ring reflects that day's done
-	// state (not the period tally, which lives in the subtitle). Numeric goals
-	// over a longer period show accumulated period progress.
-	const dayLevel = goal.type === 'checkbox' || goal.period === 'daily';
-	const ringProgress = dayLevel
-		? dayCompletion(goal, entry)
-		: evaluatePeriod(
-				goal,
-				entries,
-				periodRange(goal.period, refDate),
-				refDate,
-			).pct;
-	const complete = dayLevel ? isDayComplete(goal, entry) : ringProgress >= 1;
+	// The ring shows progress toward the goal: a longer period shows accumulated
+	// period progress; a daily goal shows that day's completion.
+	const ringProgress =
+		goal.period === 'daily'
+			? dayCompletion(goal, entry)
+			: evaluatePeriod(
+					goal,
+					entries,
+					periodRange(goal.period, refDate),
+					refDate,
+				).pct;
+	const periodComplete = ringProgress >= 1;
+	// A checkbox marks a single day; that day's done state shows as a centered
+	// check inside the ring, so both the day-check and the period progress read.
+	const dayDone = isDayComplete(goal, entry);
 
 	const stepStyle = {
 		width: 36,
@@ -133,7 +135,7 @@ export const GoalCard = memo(function GoalCard({
 			{goal.type === 'checkbox' ? (
 				<Pressable
 					onPress={() => {
-						if (complete) haptics.light();
+						if (dayDone) haptics.light();
 						else haptics.success();
 						onToggle();
 					}}
@@ -145,11 +147,15 @@ export const GoalCard = memo(function GoalCard({
 						stroke={2.5}
 						fillWhenComplete
 					>
-						{complete ? (
+						{dayDone ? (
 							<Feather
 								name='check'
 								size={18}
-								color={colors.onAccent}
+								color={
+									periodComplete
+										? colors.onAccent
+										: colors.ink
+								}
 							/>
 						) : null}
 					</ProgressRing>
@@ -177,7 +183,7 @@ export const GoalCard = memo(function GoalCard({
 						stroke={2.5}
 						fillWhenComplete
 					>
-						{complete ? (
+						{periodComplete ? (
 							<Feather
 								name='check'
 								size={16}
