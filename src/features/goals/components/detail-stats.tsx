@@ -9,7 +9,7 @@ import Animated, {
 
 import { Card, Pill, StatTile, Text } from '@/core/ui';
 import { calculateStreaks, evaluatePeriod } from '@/core/domain/aggregation';
-import { formatPrecise } from '@/core/domain/format';
+import { aggregationNote, formatAggregate } from '@/core/domain/format';
 import { periodRange } from '@/core/domain/period';
 import { Entry, Goal, PERIOD_SUFFIX, Period } from '@/core/domain/types';
 import { colors, radii, spacing } from '@/core/theme';
@@ -75,11 +75,12 @@ export function DetailStats({ goal, entries }: DetailStatsProps) {
 	const actualLabel =
 		goal.type === 'checkbox'
 			? `${result.actual} of ${result.target}`
-			: `${formatPrecise(result.actual)}${
+			: `${formatAggregate(result.actual)}${
 					result.target > 0
-						? ` / ${formatPrecise(result.target)}`
+						? ` / ${formatAggregate(result.target)}`
 						: ''
 				}${goal.unit ? ` ${goal.unit}` : ''}`;
+	const note = aggregationNote(goal);
 
 	return (
 		<View style={{ gap: spacing.base }}>
@@ -116,9 +117,20 @@ export function DetailStats({ goal, entries }: DetailStatsProps) {
 					)}
 				</View>
 
-				<Text variant='heading' weight='bold'>
-					{actualLabel}
-				</Text>
+				<View style={{ gap: 2 }}>
+					<Text variant='heading' weight='bold'>
+						{actualLabel}
+					</Text>
+					{note ? (
+						<Text
+							variant='caption'
+							muted
+							style={{ textTransform: 'uppercase' }}
+						>
+							{note}
+						</Text>
+					) : null}
+				</View>
 
 				{/* Progress bar */}
 				<ProgressBar pct={result.pct} />

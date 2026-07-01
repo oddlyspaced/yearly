@@ -10,7 +10,7 @@ import {
 	evaluatePeriod,
 	isDayComplete,
 } from '@/core/domain/aggregation';
-import { formatCount, quickStep } from '@/core/domain/format';
+import { formatAggregate, formatCount, quickStep } from '@/core/domain/format';
 import { periodRange } from '@/core/domain/period';
 import { Entry, Goal, PERIOD_SUFFIX } from '@/core/domain/types';
 import { colors, radii, shadow, spacing } from '@/core/theme';
@@ -60,7 +60,7 @@ function progressLabel(
 		refDate,
 	);
 	const t = goal.targetValue ? ` / ${formatCount(goal.targetValue)}` : '';
-	return `${formatCount(res.actual)}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
+	return `${formatAggregate(res.actual)}${t} ${unit} · ${PERIOD_SUFFIX[goal.period]}`.trim();
 }
 
 export const GoalCard = memo(function GoalCard({

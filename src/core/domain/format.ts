@@ -24,6 +24,38 @@ export function formatCount(n: number): string {
 	return n.toLocaleString('en-US', { maximumFractionDigits: 1 });
 }
 
+/**
+ * Comma-grouped whole number, for *aggregated* values (average, median, min,
+ * max, mode). These are derived and shouldn't surface noisy decimals like
+ * "8,750.4" — we round to the nearest whole number.
+ */
+export function formatAggregate(n: number): string {
+	if (!isFinite(n)) return '0';
+	return Math.round(n).toLocaleString('en-US');
+}
+
+/**
+ * Short descriptor of what a numeric goal's period value represents, e.g.
+ * "daily average". Empty for totals/counts (the number speaks for itself).
+ */
+export function aggregationNote(goal: Goal): string {
+	if (goal.type !== 'numeric') return '';
+	switch (goal.aggregation) {
+		case 'mean':
+			return 'daily average';
+		case 'median':
+			return 'daily median';
+		case 'mode':
+			return 'most common';
+		case 'min':
+			return 'lowest day';
+		case 'max':
+			return 'highest day';
+		default:
+			return '';
+	}
+}
+
 /** "of 10K steps / week · avg" style descriptor for a goal's target. */
 export function formatTargetLine(goal: Goal): string {
 	if (goal.type === 'checkbox') {
