@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
+import Animated, { Easing, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { Feather } from '@expo/vector-icons';
 
 import { IconBadge, IconButton, ProgressRing, Text } from '@/core/ui';
@@ -145,18 +146,30 @@ export const GoalCard = memo(function GoalCard({
 						progress={ringProgress}
 						size={32}
 						stroke={2.5}
-						fillWhenComplete
 					>
 						{dayDone ? (
-							<Feather
-								name='check'
-								size={18}
-								color={
-									periodComplete
-										? colors.onAccent
-										: colors.ink
-								}
-							/>
+							<Animated.View
+								entering={ZoomIn.duration(200).easing(
+									Easing.out(Easing.cubic),
+								)}
+								exiting={ZoomOut.duration(150).easing(
+									Easing.out(Easing.cubic),
+								)}
+								style={{
+									width: 22,
+									height: 22,
+									borderRadius: 11,
+									backgroundColor: colors.ink,
+									alignItems: 'center',
+									justifyContent: 'center',
+								}}
+							>
+								<Feather
+									name='check'
+									size={13}
+									color={colors.onAccent}
+								/>
+							</Animated.View>
 						) : null}
 					</ProgressRing>
 				</Pressable>
