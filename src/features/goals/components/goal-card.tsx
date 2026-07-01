@@ -72,19 +72,19 @@ export const GoalCard = memo(function GoalCard({
 	onToggle,
 	onStep,
 }: GoalCardProps) {
-	const ringProgress =
-		goal.period === 'daily'
-			? dayCompletion(goal, entry)
-			: evaluatePeriod(
-					goal,
-					entries,
-					periodRange(goal.period, refDate),
-					refDate,
-				).pct;
-	const complete =
-		goal.period === 'daily'
-			? isDayComplete(goal, entry)
-			: ringProgress >= 1;
+	// A checkbox toggles a single day, so its ring reflects that day's done
+	// state (not the period tally, which lives in the subtitle). Numeric goals
+	// over a longer period show accumulated period progress.
+	const dayLevel = goal.type === 'checkbox' || goal.period === 'daily';
+	const ringProgress = dayLevel
+		? dayCompletion(goal, entry)
+		: evaluatePeriod(
+				goal,
+				entries,
+				periodRange(goal.period, refDate),
+				refDate,
+			).pct;
+	const complete = dayLevel ? isDayComplete(goal, entry) : ringProgress >= 1;
 
 	const stepStyle = {
 		width: 36,
